@@ -10,7 +10,7 @@ admin.initializeApp();
 
 // Get a database reference
 var db = admin.database();
-var dbRef= db.ref("/slack-message-link-test");
+var dbRef= db.ref();
 
 // Gets messages in slack channel
 // Detects links in message
@@ -25,16 +25,16 @@ exports.saveLinks = functions.https.onRequest((request, response) => {
 		console.log("Request body: " + bodyJSON);		
 		console.log("Text: " + text);
 
-		var bookmarkRef = dbRef.child("bookmark");
-
+		var bookmarkRef = dbRef.child("bookmark_"+ body.event_id);
 		var iterator = linksSet.values();
+
 		for(let link of iterator) {
 			bookmarkRef.set({
 				user: "",
 				channel: "",
 				link: link
 			});
-		 	console.log("Link: " + value); 
+		 	console.log("Link: " + link); 
 		}
 
 		response.status(200).send(request.body);
