@@ -8,6 +8,10 @@ const getUrls = require('get-urls');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
+// Get a database reference
+var db = admin.database();
+var dbRef= db.ref("/slack-message-link-test");
+
 // Gets messages in slack channel
 // Detects links in message
 // Saves links into db
@@ -17,22 +21,28 @@ exports.saveLinks = functions.https.onRequest((request, response) => {
 		const text = request.body.event.text;
 		const bodyJSON = JSON.stringify(request.body);
 		const linksSet = getUrls(text);
-		const linksJSON = JSON.stringify(linksSet);
 
 		console.log("Request body: " + bodyJSON);		
 		console.log("Text: " + text);
-		// console.log("Links in text: " + linksJSON);
+
+		var bookmarkRef = dbRef.child("bookmark");
 
 		var iterator = linksSet.values();
-		for(let value of iterator) {
+		for(let link of iterator) {
+			bookmarkRef.set({
+				user: "",
+				channel: "",
+				link: link
+			});
 		 	console.log("Link: " + value); 
 		}
 
 		response.status(200).send(request.body);
-	} else {
-		console.log("Request Error...");
-		throw response.status(500);
+		return
 	}
+
+	console.log("Request Error...");
+	throw response.status(500);	
 });
 
 exports.helloWorld = functions.https.onRequest((request, response) => {
